@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python desktop packaging artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+dist/
+build/
+release/
