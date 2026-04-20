@@ -1,37 +1,85 @@
 # Dried Fruit Ledger - Instruction Manual
 
-This desktop app tracks dried fruit orders locally using Tkinter and CSV storage.
+This desktop app tracks dried-fruit orders with a local backend:
 
-## 1) What this app does
-
-- Stores orders in `ledger_data.csv` (offline/local only)
-- Calculates **Cost**, **Revenue**, and **Profit** automatically from product code + quantity + retail price
-- Shows a **Live Ledger** table in real time
-- Provides a **Weekly Report** (last 7 days)
-
-No internet connection is required.
+- **SQLite database** (`ledger.db`) for products and orders
+- **CSV export snapshot** (`ledger_data.csv`) for spreadsheet compatibility
+- Tkinter desktop interface (offline only, no internet/API required)
 
 ---
 
-## 2) Product catalog
+## 1) What this app does
 
-The app has a built-in catalog keyed by code:
+- Stores products and orders locally in `ledger.db`
+- Lets you manage product **Code + SKU + Weight + Cost + Name**
+- Accepts orders by either **Code** or **SKU**
+- Automatically calculates:
+  - total weight
+  - total cost
+  - total revenue
+  - profit
+- Shows a **Live Ledger** table in real time
+- Provides a **Weekly Report** (last 7 days)
+- Exports all orders to `ledger_data.csv` on demand (and after order save)
+
+---
+
+## 2) Data model and backend
+
+### Products
+
+Each product has:
+
+- `code` (unique)
+- `sku` (unique)
+- `name`
+- `unit_cost`
+- `unit_weight_kg`
+
+### Orders
+
+Each order stores:
+
+- `order_date`
+- `customer_name`
+- `address`
+- `product_code`
+- `sku`
+- `product_name`
+- `quantity`
+- `unit_weight_kg`
+- `total_weight_kg`
+- `total_cost`
+- `total_revenue`
+- `profit`
+
+The database file is created automatically at first run.
+
+---
+
+## 3) Default preloaded products
+
+The app preloads the full catalog:
 
 - VIL1001, VIL2001, VIL3001, VIL4001, VIL5001, VIL6001
 - MUS1001, MUS2001, MUS3001, MUS4001, MUS5001
 - CAN1001, CAN5001, CAN6001
 - HER1001, HER2001, HER3001, HER4001, HER5001, HER6001, HER7001
 
-The right side of the app shows each code and cost per unit.
+Defaults:
+
+- `sku` initially matches `code`
+- `unit_weight_kg` initially `1.000`
+- You should update SKU/weight in Product Management to your real values
 
 ---
 
-## 3) Input formats supported
+## 4) Input formats supported
 
 ### A) Single-line format
 
 ```text
-Name, Address, Code, Qty, Price
+Name, Address, CodeOrSKU, Qty, Price
 ```
 
 Example:
@@ -40,12 +88,12 @@ Example:
 Jane Doe, 12 Oak Lane, MUS2001, 3, 35
 ```
 
-### B) Multi-line block format (for real-world pasted orders)
+### B) Multi-line block format
 
 Use this when name/address come on separate lines and the last line is:
 
 ```text
-Code, Qty, Price
+CodeOrSKU, Qty, Price
 ```
 
 Example:
@@ -58,36 +106,54 @@ D10 TP28
 MUS1001, 5, 250EUR
 ```
 
+You can also use SKU in the last line:
+
+```text
+MUSH-BTN-001, 5, 250EUR
+```
+
 Notes:
 
-- Currency suffixes are accepted at the end of price (`EUR`, `GBP`, `USD`, `€`, `$`, `£`)
-- Quantity must be a whole number
-- Code is case-insensitive in input (it is normalized to uppercase)
+- Currency suffixes accepted at end of price: `EUR`, `GBP`, `USD`, `€`, `$`, `£`
+- Quantity must be a whole number > 0
+- Code/SKU matching is case-insensitive in input
 
 ---
 
-## 4) Buttons and interface
+## 5) Buttons and interface
 
-- **Process Order**: parses input, validates data, saves to CSV, and updates the live ledger
-- **Reset Input**: clears the input text box
-- **View Weekly Report**: opens totals for the last 7 days
-- **Refresh**: reloads the live ledger from disk
+- **Process Order**
+  - Parses input
+  - Resolves product by code or SKU
+  - Saves order to SQLite
+  - Refreshes live ledger
+  - Exports CSV snapshot
+- **Reset Input**
+  - Clears the order text box
+- **View Weekly Report**
+  - Shows order count, total revenue, total profit (last 7 days)
+- **Export CSV Snapshot**
+  - Writes all orders to `ledger_data.csv`
+- **Refresh**
+  - Reloads live ledger from the database
+- **Save Product** (Product Management section)
+  - Creates or updates product code/SKU/weight/cost/name
 
 Status messages appear in the **Status** panel on the left.
 
 ---
 
-## 5) CSV data storage
+## 6) CSV export format
 
-Orders are saved in `ledger_data.csv` in the same directory as the script.
+`ledger_data.csv` headers:
 
-If the file does not exist, it is created at startup with headers:
+`Date, Name, Address, Code, SKU, Product, Qty, UnitWeightKg, TotalWeightKg, Cost, Revenue, Profit`
 
-`Date, Name, Address, Code, Product, Qty, Cost, Revenue, Profit`
+This file is a spreadsheet-friendly export of your backend data.
 
 ---
 
-## 6) Running the app
+## 7) Running the app
 
 From the folder containing `dried_fruit_ledger.py`:
 
@@ -103,14 +169,26 @@ python dried_fruit_ledger.py
 
 ---
 
-## 7) Troubleshooting
+## 8) First-time setup workflow (recommended)
 
-- **Unknown product code**
-  - Check code spelling against the product list.
+1. Open app
+2. Use **Product Management** to set:
+   - true SKU values
+   - true unit weight (kg)
+   - current cost
+3. Save each product
+4. Start processing orders by Code or SKU
+
+---
+
+## 9) Troubleshooting
+
+- **Unknown product code/SKU**
+  - Add/update it in Product Management first.
 - **Invalid format**
   - Use one of the two supported input formats exactly.
 - **CSV open in another app**
-  - Close Excel/Sheets if file-lock issues occur, then try again.
+  - Close Excel/Sheets if file-lock issues occur, then export again.
 - **Tkinter missing**
   - Install a Python build that includes Tk support.
 
