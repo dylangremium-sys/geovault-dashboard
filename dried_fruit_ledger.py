@@ -1,58 +1,27 @@
-import csv
-import os
-import re
 import tkinter as tk
-from datetime import datetime, timedelta
+from datetime import datetime
 from tkinter import messagebox, ttk
 
-PRODUCT_CATALOG = {
-    "VIL1001": ("Dried Carrot Slices", 0.35),
-    "VIL2001": ("Dried Potato Cubes", 0.20),
-    "VIL3001": ("Dried Onion Flakes", 0.35),
-    "VIL4001": ("Dried Tomato Pieces", 0.35),
-    "VIL5001": ("Dried Bell Pepper Mix", 0.35),
-    "VIL6001": ("Dried Sweet Corn Kernels", 0.35),
-    "MUS1001": ("Dried Button Mushrooms", 3.00),
-    "MUS2001": ("Dried Shiitake", 25.00),
-    "MUS3001": ("Dried Oyster", 4.00),
-    "MUS4001": ("Dried Porcini", 35.00),
-    "MUS5001": ("Mixed Wild", 5.00),
-    "CAN1001": ("Dried Apple Slices", 5.00),
-    "CAN5001": ("Dried Pineapple Rings", 4.00),
-    "CAN6001": ("Dried Mango Strips", 20.00),
-    "HER1001": ("Dried Basil", 4.00),
-    "HER2001": ("Dried Oregano", 1.20),
-    "HER3001": ("Dried Thyme", 3.50),
-    "HER4001": ("Dried Rosemary", 1.20),
-    "HER5001": ("Dried Parsley", 10.00),
-    "HER6001": ("Dried Dill", 7.00),
-    "HER7001": ("Dried Mint", 1.50),
-}
+from ledger_backend import LedgerBackend
+from ledger_parser import parse_order_text
 
-CSV_FILE = "ledger_data.csv"
-HEADERS = ["Date", "Name", "Address", "Code", "Product", "Qty", "Cost", "Revenue", "Profit"]
 PRIMARY_BG = "#f3f6fa"
 CARD_BG = "#ffffff"
 
 
 class DriedFruitLedgerApp:
     def __init__(self, root: tk.Tk) -> None:
+        self.backend = LedgerBackend()
         self.root = root
         self.root.title("Dried Fruit Ledger")
-        self.root.geometry("1180x730")
+        self.root.geometry("1380x770")
         self.root.configure(bg=PRIMARY_BG)
 
-        self._init_csv()
         self._create_styles()
         self._create_widgets()
         self._load_ledger()
+        self._load_products()
         self._log("Application ready. Enter order text and click Process Order.")
-
-    def _init_csv(self) -> None:
-        if not os.path.exists(CSV_FILE):
-            with open(CSV_FILE, "w", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file)
-                writer.writerow(HEADERS)
 
     def _create_styles(self) -> None:
         style = ttk.Style()
@@ -69,7 +38,7 @@ class DriedFruitLedgerApp:
 
         left_panel = tk.Frame(app_frame, bg=CARD_BG, bd=1, relief=tk.SOLID)
         left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 12))
-        left_panel.configure(width=390)
+        left_panel.configure(width=420)
         left_panel.pack_propagate(False)
 
         right_panel = tk.Frame(app_frame, bg=CARD_BG, bd=1, relief=tk.SOLID)
@@ -101,11 +70,12 @@ class DriedFruitLedgerApp:
         instructions = (
             "1) Paste order details into the box below.\n"
             "2) Supported formats:\n"
-            "   - Single line: Name, Address, Code, Qty, Price\n"
-            "   - Multi-line blocks ending with: Code, Qty, Price (EUR/GBP/$ accepted)\n"
+            "   - Single line: Name, Address, Code/SKU, Qty, Price\n"
+            "   - Multi-line blocks ending with: Code/SKU, Qty, Price\n"
             "3) Click Process Order.\n"
             "4) Live Ledger updates instantly.\n"
-            "5) Use Reset Input to clear the text box."
+            "5) Set product SKU and weight in Product Management.\n"
+            "6) Use Reset Input to clear the text box."
         )
         instructions_lbl = tk.Label(
             panel,
@@ -124,7 +94,9 @@ class DriedFruitLedgerApp:
             "37 Garryowen Rd\n"
             "Dublin 10\n"
             "D10 TP28\n"
-            "MUS1001, 5, 250EUR"
+            "MUS1001, 5, 250EUR\n\n"
+            "You can use SKU too (example):\n"
+            "MUSH-BTN-001, 5, 250EUR"
         )
         hint_lbl = tk.Label(
             panel,
@@ -148,7 +120,7 @@ class DriedFruitLedgerApp:
 
         self.input_box = tk.Text(
             panel,
-            height=13,
+            height=9,
             wrap=tk.WORD,
             font=("Consolas", 10),
             relief=tk.SOLID,
@@ -204,6 +176,73 @@ class DriedFruitLedgerApp:
         )
         report_btn.pack(fill=tk.X, padx=14, pady=(2, 10))
 
+        export_btn = tk.Button(
+            panel,
+            text="Export CSV Snapshot",
+            command=self.export_csv_snapshot,
+            bg="#495d73",
+            fg="white",
+            activebackground="#344557",
+            activeforeground="white",
+            font=("Segoe UI", 10, "bold"),
+            relief=tk.FLAT,
+            padx=10,
+            pady=8,
+        )
+        export_btn.pack(fill=tk.X, padx=14, pady=(0, 10))
+
+        product_title = tk.Label(
+            panel,
+            text="Product Management (Code + SKU + Weight)",
+            bg=CARD_BG,
+            font=("Segoe UI", 10, "bold"),
+            padx=14,
+        )
+        product_title.pack(anchor="w")
+
+        form = tk.Frame(panel, bg=CARD_BG)
+        form.pack(fill=tk.X, padx=14, pady=(6, 10))
+
+        tk.Label(form, text="Code", bg=CARD_BG, font=("Segoe UI", 9)).grid(row=0, column=0, sticky="w")
+        self.product_code_var = tk.StringVar()
+        tk.Entry(form, textvariable=self.product_code_var, width=12).grid(row=1, column=0, padx=(0, 6), pady=(2, 6))
+
+        tk.Label(form, text="SKU", bg=CARD_BG, font=("Segoe UI", 9)).grid(row=0, column=1, sticky="w")
+        self.product_sku_var = tk.StringVar()
+        tk.Entry(form, textvariable=self.product_sku_var, width=14).grid(row=1, column=1, padx=(0, 6), pady=(2, 6))
+
+        tk.Label(form, text="Weight kg", bg=CARD_BG, font=("Segoe UI", 9)).grid(row=0, column=2, sticky="w")
+        self.product_weight_var = tk.StringVar(value="1.000")
+        tk.Entry(form, textvariable=self.product_weight_var, width=10).grid(
+            row=1, column=2, padx=(0, 6), pady=(2, 6)
+        )
+
+        tk.Label(form, text="Unit Cost", bg=CARD_BG, font=("Segoe UI", 9)).grid(row=0, column=3, sticky="w")
+        self.product_cost_var = tk.StringVar()
+        tk.Entry(form, textvariable=self.product_cost_var, width=10).grid(row=1, column=3, pady=(2, 6))
+
+        tk.Label(form, text="Product Name", bg=CARD_BG, font=("Segoe UI", 9)).grid(
+            row=2, column=0, sticky="w", pady=(2, 0)
+        )
+        self.product_name_var = tk.StringVar()
+        tk.Entry(form, textvariable=self.product_name_var, width=42).grid(
+            row=3, column=0, columnspan=3, sticky="we", pady=(2, 2), padx=(0, 6)
+        )
+        save_product_btn = tk.Button(
+            form,
+            text="Save Product",
+            command=self.save_product,
+            bg="#5a3ec8",
+            fg="white",
+            activebackground="#432ea0",
+            activeforeground="white",
+            font=("Segoe UI", 9, "bold"),
+            relief=tk.FLAT,
+            padx=8,
+            pady=5,
+        )
+        save_product_btn.grid(row=3, column=3, sticky="we", pady=(2, 2))
+
         log_title = tk.Label(
             panel,
             text="Status",
@@ -215,7 +254,7 @@ class DriedFruitLedgerApp:
 
         self.status_box = tk.Text(
             panel,
-            height=8,
+            height=6,
             wrap=tk.WORD,
             bg="#171a21",
             fg="#9ef2b1",
@@ -233,7 +272,7 @@ class DriedFruitLedgerApp:
 
         ledger_title = tk.Label(
             top,
-            text="Live Ledger (Latest 100 Orders)",
+            text="Live Ledger (Latest 150 Orders)",
             bg=CARD_BG,
             font=("Segoe UI", 13, "bold"),
         )
@@ -254,16 +293,32 @@ class DriedFruitLedgerApp:
         table_frame = tk.Frame(panel, bg=CARD_BG)
         table_frame.pack(fill=tk.BOTH, expand=True, padx=14, pady=(4, 14))
 
-        columns = ("Date", "Name", "Address", "Code", "Product", "Qty", "Cost", "Revenue", "Profit")
+        columns = (
+            "Date",
+            "Name",
+            "Address",
+            "Code",
+            "SKU",
+            "Product",
+            "Qty",
+            "UnitWtKg",
+            "TotalWtKg",
+            "Cost",
+            "Revenue",
+            "Profit",
+        )
         self.ledger_tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="Ledger.Treeview")
 
         widths = {
             "Date": 130,
             "Name": 120,
-            "Address": 180,
-            "Code": 78,
-            "Product": 170,
+            "Address": 210,
+            "Code": 80,
+            "SKU": 110,
+            "Product": 150,
             "Qty": 48,
+            "UnitWtKg": 78,
+            "TotalWtKg": 82,
             "Cost": 70,
             "Revenue": 78,
             "Profit": 70,
@@ -292,7 +347,7 @@ class DriedFruitLedgerApp:
 
         catalog_title = tk.Label(
             catalog_frame,
-            text="Product Catalog (Cost per Unit)",
+            text="Product Catalog (Code | SKU | Weight kg | Cost)",
             bg="#f7f9fc",
             font=("Segoe UI", 10, "bold"),
             padx=10,
@@ -300,18 +355,24 @@ class DriedFruitLedgerApp:
         )
         catalog_title.pack(anchor="w")
 
-        catalog_text = tk.Text(
-            catalog_frame,
-            height=6,
-            wrap=tk.NONE,
-            font=("Consolas", 9),
-            bg="#f7f9fc",
-            relief=tk.FLAT,
-        )
-        catalog_text.pack(fill=tk.X, padx=10, pady=(0, 8))
-        for code, (name, cost) in PRODUCT_CATALOG.items():
-            catalog_text.insert(tk.END, f"{code:<8}  {name:<28}  {cost:>5.2f}\n")
-        catalog_text.configure(state=tk.DISABLED)
+        catalog_table_frame = tk.Frame(catalog_frame, bg="#f7f9fc")
+        catalog_table_frame.pack(fill=tk.X, padx=10, pady=(0, 8))
+
+        catalog_cols = ("Code", "SKU", "Name", "WtKg", "Cost")
+        self.catalog_tree = ttk.Treeview(catalog_table_frame, columns=catalog_cols, show="headings", height=6)
+        for col in catalog_cols:
+            self.catalog_tree.heading(col, text=col)
+        self.catalog_tree.column("Code", width=80, stretch=False)
+        self.catalog_tree.column("SKU", width=100, stretch=False)
+        self.catalog_tree.column("Name", width=190, stretch=False)
+        self.catalog_tree.column("WtKg", width=64, stretch=False)
+        self.catalog_tree.column("Cost", width=60, stretch=False)
+
+        catalog_scroll = ttk.Scrollbar(catalog_table_frame, orient=tk.VERTICAL, command=self.catalog_tree.yview)
+        self.catalog_tree.configure(yscrollcommand=catalog_scroll.set)
+        self.catalog_tree.grid(row=0, column=0, sticky="nsew")
+        catalog_scroll.grid(row=0, column=1, sticky="ns")
+        catalog_table_frame.grid_columnconfigure(0, weight=1)
 
     def reset_input(self) -> None:
         self.input_box.delete("1.0", tk.END)
@@ -324,51 +385,6 @@ class DriedFruitLedgerApp:
         self.status_box.see(tk.END)
         self.status_box.configure(state=tk.DISABLED)
 
-    @staticmethod
-    def _parse_money(value: str) -> float:
-        cleaned = value.strip().upper().replace(",", "")
-        cleaned = re.sub(r"(EUR|GBP|USD|€|\$|£)$", "", cleaned).strip()
-        return float(cleaned)
-
-    @staticmethod
-    def _normalize_lines(raw_data: str) -> list[str]:
-        lines = [line.strip() for line in raw_data.splitlines()]
-        return [line for line in lines if line]
-
-    def _parse_order(self, raw_data: str) -> tuple[str, str, str, int, float]:
-        lines = self._normalize_lines(raw_data)
-        if not lines:
-            raise ValueError("No input provided.")
-
-        if len(lines) == 1 and lines[0].count(",") >= 4:
-            parts = [part.strip() for part in lines[0].split(",")]
-            if len(parts) != 5:
-                raise ValueError("Single-line format must be: Name, Address, Code, Qty, Price")
-            name, address, code, qty_raw, price_raw = parts
-            qty = int(qty_raw)
-            price = self._parse_money(price_raw)
-            return name, address, code.upper(), qty, price
-
-        trailing_line = lines[-1]
-        trailing_parts = [part.strip() for part in trailing_line.split(",")]
-        if len(trailing_parts) != 3:
-            raise ValueError(
-                "Multi-line format must end with: Code, Qty, Price (example: MUS1001, 5, 250EUR)"
-            )
-        code, qty_raw, price_raw = trailing_parts
-        code = code.upper()
-        qty = int(qty_raw)
-        price = self._parse_money(price_raw)
-
-        if len(lines) < 2:
-            raise ValueError("Multi-line format requires at least a name line before code/qty/price line.")
-        name = lines[0]
-        address = " ".join(lines[1:-1]).strip()
-        if not address:
-            raise ValueError("Address is required.")
-
-        return name, address, code, qty, price
-
     def process_order(self) -> None:
         raw_data = self.input_box.get("1.0", tk.END).strip()
         if not raw_data:
@@ -376,44 +392,30 @@ class DriedFruitLedgerApp:
             return
 
         try:
-            name, address, code, qty, retail_unit_price = self._parse_order(raw_data)
-
-            if qty <= 0:
-                raise ValueError("Quantity must be greater than zero.")
-            if retail_unit_price < 0:
-                raise ValueError("Retail price cannot be negative.")
-            if code not in PRODUCT_CATALOG:
-                raise ValueError(f"Unknown product code: {code}")
-
-            product_name, unit_cost = PRODUCT_CATALOG[code]
-            total_cost = unit_cost * qty
-            total_revenue = retail_unit_price * qty
-            profit = total_revenue - total_cost
-
-            order_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-            with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file)
-                writer.writerow(
-                    [
-                        order_date,
-                        name,
-                        address,
-                        code,
-                        product_name,
-                        qty,
-                        f"{total_cost:.2f}",
-                        f"{total_revenue:.2f}",
-                        f"{profit:.2f}",
-                    ]
-                )
+            parsed = parse_order_text(raw_data)
+            saved = self.backend.create_order(
+                customer_name=parsed.customer_name,
+                address=parsed.address,
+                code_or_sku=parsed.code_or_sku,
+                quantity=parsed.quantity,
+                unit_price=parsed.unit_price,
+            )
+            self.backend.export_orders_csv("ledger_data.csv")
 
             self._log(
-                f"Saved order for {name} | {code} ({qty} units) | Revenue {total_revenue:.2f} | Profit {profit:.2f}"
+                "Saved order for "
+                f"{saved['name']} | {saved['code']} / {saved['sku']} ({saved['qty']} units) | "
+                f"Revenue {saved['revenue']:.2f} | Profit {saved['profit']:.2f}"
             )
             self._load_ledger()
             messagebox.showinfo(
                 "Order Processed",
-                f"Product: {product_name}\nTotal Revenue: {total_revenue:.2f}\nTotal Profit: {profit:.2f}",
+                "Product: "
+                f"{saved['product']}\n"
+                f"SKU: {saved['sku']}\n"
+                f"Total Weight: {saved['total_weight_kg']:.3f} kg\n"
+                f"Total Revenue: {saved['revenue']:.2f}\n"
+                f"Total Profit: {saved['profit']:.2f}",
             )
         except ValueError as exc:
             self._log(f"Validation error: {exc}")
@@ -426,50 +428,84 @@ class DriedFruitLedgerApp:
         for item in self.ledger_tree.get_children():
             self.ledger_tree.delete(item)
 
-        try:
-            with open(CSV_FILE, "r", newline="", encoding="utf-8") as file:
-                reader = csv.DictReader(file)
-                rows = list(reader)
-        except FileNotFoundError:
-            rows = []
-
-        for row in rows[-100:][::-1]:
-            profit_value = float(row["Profit"])
+        rows = self.backend.list_recent_orders(limit=150)
+        for row in rows:
+            profit_value = float(row["profit"])
             tag = "positive" if profit_value >= 0 else "negative"
             self.ledger_tree.insert(
                 "",
                 tk.END,
                 values=(
-                    row["Date"],
-                    row["Name"],
-                    row["Address"],
-                    row["Code"],
-                    row["Product"],
-                    row["Qty"],
-                    row["Cost"],
-                    row["Revenue"],
-                    row["Profit"],
+                    row["order_date"],
+                    row["customer_name"],
+                    row["address"],
+                    row["product_code"],
+                    row["sku"],
+                    row["product_name"],
+                    row["quantity"],
+                    f'{float(row["unit_weight_kg"]):.3f}',
+                    f'{float(row["total_weight_kg"]):.3f}',
+                    f'{float(row["total_cost"]):.2f}',
+                    f'{float(row["total_revenue"]):.2f}',
+                    f'{float(row["profit"]):.2f}',
                 ),
                 tags=(tag,),
             )
 
-    def view_weekly_report(self) -> None:
-        seven_days_ago = datetime.now() - timedelta(days=7)
-        total_revenue = 0.0
-        total_profit = 0.0
-        order_count = 0
+    def _load_products(self) -> None:
+        for item in self.catalog_tree.get_children():
+            self.catalog_tree.delete(item)
 
+        for product in self.backend.get_products():
+            self.catalog_tree.insert(
+                "",
+                tk.END,
+                values=(
+                    product.code,
+                    product.sku,
+                    product.name,
+                    f"{product.unit_weight_kg:.3f}",
+                    f"{product.unit_cost:.2f}",
+                ),
+            )
+
+    def save_product(self) -> None:
         try:
-            with open(CSV_FILE, "r", newline="", encoding="utf-8") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    order_date = datetime.strptime(row["Date"], "%Y-%m-%d %H:%M")
-                    if order_date >= seven_days_ago:
-                        order_count += 1
-                        total_revenue += float(row["Revenue"])
-                        total_profit += float(row["Profit"])
-        except FileNotFoundError:
-            pass
+            code = self.product_code_var.get()
+            sku = self.product_sku_var.get()
+            name = self.product_name_var.get()
+            unit_cost = float(self.product_cost_var.get())
+            unit_weight_kg = float(self.product_weight_var.get())
+            product = self.backend.upsert_product(
+                code=code, sku=sku, name=name, unit_cost=unit_cost, unit_weight_kg=unit_weight_kg
+            )
+            self._load_products()
+            self._log(
+                f"Saved product {product.code} / {product.sku} | {product.name} | "
+                f"Weight {product.unit_weight_kg:.3f} kg | Cost {product.unit_cost:.2f}"
+            )
+            messagebox.showinfo("Product Saved", f"{product.code} / {product.sku} updated successfully.")
+        except ValueError as exc:
+            self._log(f"Product validation error: {exc}")
+            messagebox.showerror("Invalid Product", str(exc))
+        except Exception as exc:
+            self._log(f"Unexpected product save error: {exc}")
+            messagebox.showerror("Error", f"Could not save product.\n{exc}")
+
+    def export_csv_snapshot(self) -> None:
+        try:
+            path = self.backend.export_orders_csv("ledger_data.csv")
+            self._log(f"Exported CSV snapshot to {path}")
+            messagebox.showinfo("CSV Exported", f"Ledger snapshot exported:\n{path}")
+        except Exception as exc:
+            self._log(f"CSV export failed: {exc}")
+            messagebox.showerror("Export Failed", f"Could not export CSV.\n{exc}")
+
+    def view_weekly_report(self) -> None:
+        totals = self.backend.weekly_totals(days=7)
+        total_revenue = totals["total_revenue"]
+        total_profit = totals["total_profit"]
+        order_count = totals["order_count"]
 
         report = tk.Toplevel(self.root)
         report.title("Weekly Report (Last 7 Days)")
