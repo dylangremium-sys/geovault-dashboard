@@ -1,56 +1,69 @@
 # BACKEND_CONTRACT.md
 
-## Status
-UNVERIFIED — DO NOT USE FOR IMPLEMENTATION
+## Source of truth
+Verified from:
+- ~/geovault-protocol/gfp-motherboard/src/main.py
+- ~/geovault-protocol/gfp-motherboard/src/api/payments.py
+- ~/geovault-protocol/gfp-motherboard/src/db/models.py
+- ~/geovault-protocol/gfp-motherboard/src/core/auth.py
+- ~/geovault-protocol/gfp-motherboard/src/core/config.py
 
 ---
 
-## Purpose
+## Verified endpoints
 
-This file will contain the ONLY allowed source of truth
-for frontend ↔ backend communication.
+GET /health
+Response:
+{ "status": "ok" }
 
----
+GET /
+Response:
+{ "message": "GeoVault Protocol API running" }
 
-## Rules
+POST /drops
+Auth: x-api-key required
+Input:
+- w3w_address: string
+- lat: float
+- lng: float
+- price_crypto: float
+Response:
+{ "status": "success", "id": number }
 
-- Do NOT write anything here from memory
-- Do NOT copy from chat
-- Do NOT assume endpoints
-- Everything must come from:
-  ~/geovault-protocol/gfp-motherboard
+GET /drops/nearby
+Query:
+- lat: float
+- lng: float
+- radius_km: float (default 10)
+Response:
+[
+  { "id": number, "distance_km": number, "status": "active" }
+]
 
----
+GET /admin/drops
+Auth: x-api-key required
 
-## Required verification
+GET /admin/entitlements
+Auth: x-api-key required
 
-The following must be extracted from backend code:
+GET /admin/summary
+Auth: x-api-key required
 
-For each endpoint:
+POST /claim
+Input:
+- drop_id: number
+- lat: float
+- lng: float
+- entitlement_token: string
 
-- Route path
-- HTTP method
-- Headers required
-- Auth requirements
-- Request body shape
-- Response shape
-- Error responses
+POST /reveal
+Input:
+- drop_id: number
+- entitlement_token: string
 
----
+POST /payments/create
+Auth: x-api-key required
 
-## Target endpoint groups
-
-- /health
-- /drops
-- /drops/nearby
-- /claim
-- /payments/*
-- /admin/*
-
----
-
-## Current state
-
-No endpoints verified yet.
-
-DO NOT CONNECT FRONTEND TO BACKEND UNTIL THIS FILE IS COMPLETE.
+POST /payments/callback
+Header:
+- x-nowpayments-sig
