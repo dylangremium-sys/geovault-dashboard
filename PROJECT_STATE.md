@@ -15,9 +15,9 @@ GeoVault Dashboard
 
 ### Frontend foundation
 - Next.js App Router project
-- Minimal dashboard implementation now exists on the homepage
+- Homepage now contains a minimal live read-only dashboard
 - Homepage is connected to the live backend
-- Homepage renders verified contract-backed data only
+- Homepage renders only contract-backed data that has been explicitly approved
 
 ### Existing frontend files
 - app/layout.tsx
@@ -38,17 +38,18 @@ GeoVault Dashboard
 - runtime verification completed successfully
 - live backend connectivity verified
 - authenticated `/admin/summary` rendering verified
+- authenticated `/admin/drops` rendering verified
 
 ### Verified homepage content
 The homepage currently renders only:
 - API health status
 - root API message
 - admin summary values
+- admin drops list
 
 ### Confirmed NOT implemented
-- Admin drops list page/section
+- Admin entitlements section
 - Payments UI
-- Entitlements UI
 - Map view
 - Multi-page dashboard structure
 - Auth UI
@@ -56,6 +57,7 @@ The homepage currently renders only:
 - Shared component system
 - State management layer
 - Filters/search/sort/tabs/charts
+- Row actions or mutations
 
 ### Contract rule
 Frontend work must follow `BACKEND_CONTRACT.md` exactly.
@@ -68,19 +70,19 @@ Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT 
 
 ## Current phase
 
-Phase 3 — Live read-only validation complete
+Phase 4 — Live admin drops validation complete
 
 ---
 
 ## Next approved task
 
 Extend the homepage with one additional read-only contract-backed section only:
-- admin drops list from `/admin/drops`
+- admin entitlements list from `/admin/entitlements`
 
 Allowed scope:
 - reuse existing request helpers and type layer
 - extend homepage only
-- render only verified fields from admin drops response
+- render only verified fields from admin entitlements response
 - no filters
 - no sorting UI
 - no search

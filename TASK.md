@@ -12,7 +12,7 @@ DO NOT ADD NEW FEATURES.
 
 ## Task
 
-Add one minimal read-only admin drops section to `app/page.tsx`.
+Add one minimal read-only admin entitlements section to `app/page.tsx`.
 
 ---
 
@@ -27,16 +27,15 @@ Add one minimal read-only admin drops section to `app/page.tsx`.
 2. Reuse the existing homepage only.
 
 3. Add one additional read-only section backed by:
-   - `/admin/drops`
+   - `/admin/entitlements`
 
-4. Render only verified fields from each drop item:
+4. Render only verified fields from each entitlement item:
    - `id`
-   - `w3w_address`
-   - `lat`
-   - `lng`
-   - `price_crypto`
-   - `is_claimed`
-   - `product_id`
+   - `drop_id`
+   - `payment_id`
+   - `is_used`
+   - `expires_at`
+   - `created_at`
 
 5. Keep the presentation minimal.
    A simple stacked list or plain table is acceptable.
@@ -72,5 +71,6 @@ Add one minimal read-only admin drops section to `app/page.tsx`.
 - root message
 - admin summary
 - admin drops list
+- admin entitlements list
 
 All fields must map directly to verified contract data.

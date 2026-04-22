@@ -30,15 +30,14 @@ Before frontend implementation:
 For the homepage extension step:
 - only approved files change
 - homepage still renders existing validated sections
-- added section uses `/admin/drops`
+- added section uses `/admin/entitlements`
 - rendered item fields are limited to:
   - `id`
-  - `w3w_address`
-  - `lat`
-  - `lng`
-  - `price_crypto`
-  - `is_claimed`
-  - `product_id`
+  - `drop_id`
+  - `payment_id`
+  - `is_used`
+  - `expires_at`
+  - `created_at`
 - no unapproved controls or sections appear
 
 Runtime checks:
@@ -46,7 +45,8 @@ Runtime checks:
 - page renders
 - no console errors
 - existing summary still works
-- admin drops section renders real backend data or visible error state
+- existing drops section still works
+- admin entitlements section renders real backend data or visible error state
 
 ---
 
