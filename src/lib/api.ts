@@ -123,13 +123,18 @@ export async function postCreatePayment(
 export async function postCreateDrop(
   payload: CreateDropRequest,
 ): Promise<CreateDropSuccessResponse> {
-  return request<CreateDropSuccessResponse>("/drops", {
+  const search = new URLSearchParams({
+    w3w_address: payload.w3w_address,
+    lat: String(payload.lat),
+    lng: String(payload.lng),
+    price_crypto: String(payload.price_crypto),
+  });
+
+  return request<CreateDropSuccessResponse>(`/drops?${search.toString()}`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       ...adminHeaders(),
     },
-    body: JSON.stringify(payload),
   });
 }
 
