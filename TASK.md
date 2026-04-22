@@ -2,38 +2,55 @@
 
 ## Current task
 
-DO NOT BUILD UI IN THIS BLOCK.
+STRUCTURAL CLEANUP ONLY.
 
-DO NOT ADD NEW FEATURES IN THIS BLOCK.
+NO BEHAVIOR CHANGE.
+
+NO NEW FEATURES.
 
 ---
 
 ## Task
 
-Lock the reviewed state and define the next approved direction without implementation.
+Prepare the repo for safe structural cleanup of the existing homepage only.
 
 ---
 
 ## Steps
 
-1. Confirm from `BACKEND_CONTRACT.md` which verified backend routes are already covered by the existing homepage.
-2. Confirm whether any safe unused read-only GET route remains.
-3. If none remains, record that result in the control files.
-4. Do not add UI, request helpers, or types in this block.
+1. Inspect:
+   - `app/page.tsx`
+   - `src/lib/api.ts`
+   - `src/types/api.ts`
+   - `BACKEND_CONTRACT.md`
+
+2. Keep current behavior exactly the same.
+
+3. Any future cleanup step may only:
+   - reduce duplication
+   - improve readability
+   - extract minimal presentational helpers/components
+   - preserve all current rendered fields and request usage
+
+4. Do not change:
+   - routes used
+   - response handling behavior
+   - page sections
+   - field names
+   - auth behavior
+   - request flow
 
 ---
 
 ## Output requirement
 
+- No implementation in this block
 - Control files only
 - Exact contract alignment
-- No assumptions
-- No speculative feature expansion
+- Zero behavior expansion
 
 ---
 
 ## Completion condition
 
-The control files clearly record that:
-- the current homepage covers the existing safe read-only admin GET endpoints already implemented
-- no further homepage read-only section is approved without a new planning decision
+The repo control files clearly lock the next phase as structural cleanup only, with no behavior change.

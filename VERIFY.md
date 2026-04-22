@@ -17,28 +17,34 @@ Defines how every step must be verified.
 
 ## Contract verification
 
-Before approving any new frontend task:
-- read `BACKEND_CONTRACT.md`
-- confirm the route or response actually exists
-- confirm whether it is already covered in the frontend
-- confirm whether it is read-only or mutation-driven
-- confirm no extra fields are introduced
+Before any structural cleanup:
+- confirm no new fields are introduced
+- confirm no routes are added or removed
+- confirm all existing rendered values still map to the contract
 
 ---
 
-## Frontend verification
+## Structural cleanup verification
 
-For review/control-file steps:
-- no UI files change
-- no type files change
-- no request layer files change
-- reviewed conclusion must be supported by the verified contract only
+For the next cleanup phase:
+- behavior must remain identical
+- same homepage sections must remain visible
+- same request helpers must be used
+- no new endpoints may be introduced
+- no request-layer logic may change
+- no type-layer meaning may change
 
-Later runtime checks:
+Runtime checks after cleanup:
 - dev server runs
 - page renders
 - no console errors
-- existing verified sections remain working
+- health section still works
+- summary still works
+- drops still work
+- entitlements still work
+
+Type checks after cleanup:
+- `npx tsc --noEmit` passes
 
 ---
 

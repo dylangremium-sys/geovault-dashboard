@@ -30,7 +30,7 @@ GeoVault Dashboard
 - config files
 
 ### Verified completed implementation
-- `BACKEND_CONTRACT.md` exists and is derived from backend code
+- `BACKEND_CONTRACT.md` exists and has been repaired
 - contract-locked TypeScript API types exist
 - minimal config layer exists
 - minimal request layer exists
@@ -39,6 +39,8 @@ GeoVault Dashboard
 - authenticated `/admin/summary` rendering verified
 - authenticated `/admin/drops` rendering verified
 - authenticated `/admin/entitlements` rendering verified
+- Cursor contract review passes
+- TypeScript type-check passes
 
 ### Verified homepage content
 The homepage currently renders only:
@@ -48,38 +50,16 @@ The homepage currently renders only:
 - admin drops list
 - admin entitlements list
 
-### Contract review result
-Verified backend routes already represented in the frontend layer:
-- `GET /health`
-- `GET /`
-- `GET /admin/summary`
-- `GET /admin/drops`
-- `GET /admin/entitlements`
-
-Verified backend routes not yet implemented as homepage read-only rendering:
-- none of the currently exposed GET admin list/summary routes remain unused
-
-Verified backend routes present in contract but not appropriate as the next homepage read-only section:
-- `POST /drops`
-- `POST /claim`
-- `POST /reveal`
-- `POST /payments/create`
-- `POST /payments/callback`
-
-Reason:
-- they are mutation or provider-driven flows, not the next smallest safe read-only homepage extension
-
 ### Confirmed NOT implemented
-- Payments execution UI
-- Drop creation UI
+- Payments UI
 - Claim UI
 - Reveal UI
+- Drop creation UI
 - Map view
 - Multi-page dashboard structure
 - Auth UI
 - Role system
 - Shared component system
-- State management layer
 - Filters/search/sort/tabs/charts
 - Row actions or mutations
 
@@ -94,22 +74,28 @@ Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT 
 
 ## Current phase
 
-Phase 6 — Contract review complete after core read-only admin coverage
+Phase 7 — Verified checkpoint frozen
 
 ---
 
 ## Next approved task
 
-Do a control-file planning step to define the next implementation direction before adding new UI.
+Structural cleanup only, with no behavior change.
 
-Approved planning options:
-- keep homepage frozen and document this checkpoint
-- approve a minimal mutation-safe technical preparation step only if contract-backed
-- approve structural cleanup only if it does not change behavior
+Allowed scope:
+- improve maintainability of the existing homepage code
+- extract minimal presentational pieces only if behavior stays identical
+- keep same routes
+- keep same rendered fields
+- keep same loading/error behavior
+- keep same page content
 
-Not yet approved:
-- new mutation UI
-- payments flow UI
-- claim/reveal UI
-- extra pages
-- speculative sections
+Not allowed:
+- new endpoints
+- new UI sections
+- new pages
+- new features
+- behavior changes
+- auth flow changes
+- request-layer changes
+- contract changes
