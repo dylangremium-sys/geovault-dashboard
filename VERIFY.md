@@ -17,36 +17,28 @@ Defines how every step must be verified.
 
 ## Contract verification
 
-Before frontend implementation:
+Before approving any new frontend task:
 - read `BACKEND_CONTRACT.md`
+- confirm the route or response actually exists
+- confirm whether it is already covered in the frontend
+- confirm whether it is read-only or mutation-driven
 - confirm no extra fields are introduced
-- confirm existing request helpers and types are reused
-- confirm rendered fields are contract-backed only
 
 ---
 
 ## Frontend verification
 
-For the homepage extension step:
-- only approved files change
-- homepage still renders existing validated sections
-- added section uses `/admin/entitlements`
-- rendered item fields are limited to:
-  - `id`
-  - `drop_id`
-  - `payment_id`
-  - `is_used`
-  - `expires_at`
-  - `created_at`
-- no unapproved controls or sections appear
+For review/control-file steps:
+- no UI files change
+- no type files change
+- no request layer files change
+- reviewed conclusion must be supported by the verified contract only
 
-Runtime checks:
+Later runtime checks:
 - dev server runs
 - page renders
 - no console errors
-- existing summary still works
-- existing drops section still works
-- admin entitlements section renders real backend data or visible error state
+- existing verified sections remain working
 
 ---
 

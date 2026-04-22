@@ -15,9 +15,9 @@ GeoVault Dashboard
 
 ### Frontend foundation
 - Next.js App Router project
-- Homepage now contains a minimal live read-only dashboard
+- Homepage contains a minimal live read-only dashboard
 - Homepage is connected to the live backend
-- Homepage renders only contract-backed data that has been explicitly approved
+- Homepage renders only approved contract-backed data
 
 ### Existing frontend files
 - app/layout.tsx
@@ -34,11 +34,11 @@ GeoVault Dashboard
 - contract-locked TypeScript API types exist
 - minimal config layer exists
 - minimal request layer exists
-- first minimal read-only page exists
-- runtime verification completed successfully
+- homepage runtime verification completed successfully
 - live backend connectivity verified
 - authenticated `/admin/summary` rendering verified
 - authenticated `/admin/drops` rendering verified
+- authenticated `/admin/entitlements` rendering verified
 
 ### Verified homepage content
 The homepage currently renders only:
@@ -46,10 +46,34 @@ The homepage currently renders only:
 - root API message
 - admin summary values
 - admin drops list
+- admin entitlements list
+
+### Contract review result
+Verified backend routes already represented in the frontend layer:
+- `GET /health`
+- `GET /`
+- `GET /admin/summary`
+- `GET /admin/drops`
+- `GET /admin/entitlements`
+
+Verified backend routes not yet implemented as homepage read-only rendering:
+- none of the currently exposed GET admin list/summary routes remain unused
+
+Verified backend routes present in contract but not appropriate as the next homepage read-only section:
+- `POST /drops`
+- `POST /claim`
+- `POST /reveal`
+- `POST /payments/create`
+- `POST /payments/callback`
+
+Reason:
+- they are mutation or provider-driven flows, not the next smallest safe read-only homepage extension
 
 ### Confirmed NOT implemented
-- Admin entitlements section
-- Payments UI
+- Payments execution UI
+- Drop creation UI
+- Claim UI
+- Reveal UI
 - Map view
 - Multi-page dashboard structure
 - Auth UI
@@ -70,21 +94,22 @@ Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT 
 
 ## Current phase
 
-Phase 4 — Live admin drops validation complete
+Phase 6 — Contract review complete after core read-only admin coverage
 
 ---
 
 ## Next approved task
 
-Extend the homepage with one additional read-only contract-backed section only:
-- admin entitlements list from `/admin/entitlements`
+Do a control-file planning step to define the next implementation direction before adding new UI.
 
-Allowed scope:
-- reuse existing request helpers and type layer
-- extend homepage only
-- render only verified fields from admin entitlements response
-- no filters
-- no sorting UI
-- no search
-- no row actions
-- no edit/create/delete controls
+Approved planning options:
+- keep homepage frozen and document this checkpoint
+- approve a minimal mutation-safe technical preparation step only if contract-backed
+- approve structural cleanup only if it does not change behavior
+
+Not yet approved:
+- new mutation UI
+- payments flow UI
+- claim/reveal UI
+- extra pages
+- speculative sections
