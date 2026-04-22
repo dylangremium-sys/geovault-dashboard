@@ -1,6 +1,13 @@
-import { getAdminDrops, getAdminSummary, getHealth, getRoot } from "@/src/lib/api";
+import {
+  getAdminDrops,
+  getAdminEntitlements,
+  getAdminSummary,
+  getHealth,
+  getRoot,
+} from "@/src/lib/api";
 import type {
   AdminDropsResponse,
+  AdminEntitlementsResponse,
   AdminSummaryResponse,
   HealthResponse,
   RootResponse,
@@ -11,17 +18,19 @@ async function loadDashboardData(): Promise<{
   root?: RootResponse;
   summary?: AdminSummaryResponse;
   drops?: AdminDropsResponse;
+  entitlements?: AdminEntitlementsResponse;
   error?: string;
 }> {
   try {
-    const [health, root, summary, drops] = await Promise.all([
+    const [health, root, summary, drops, entitlements] = await Promise.all([
       getHealth(),
       getRoot(),
       getAdminSummary(),
       getAdminDrops(),
+      getAdminEntitlements(),
     ]);
 
-    return { health, root, summary, drops };
+    return { health, root, summary, drops, entitlements };
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unknown error",
@@ -112,7 +121,7 @@ export default async function Home() {
               </div>
             </section>
 
-            <section>
+            <section className="mb-8">
               <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
                 Admin Drops
               </div>
@@ -143,6 +152,52 @@ export default async function Home() {
                         </td>
                         <td className="px-4 py-3 text-neutral-200">
                           {drop.product_id ?? "null"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                Admin Entitlements
+              </div>
+
+              <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
+                <table className="min-w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-800 text-left text-neutral-500">
+                      <th className="px-4 py-3 font-medium">ID</th>
+                      <th className="px-4 py-3 font-medium">Drop ID</th>
+                      <th className="px-4 py-3 font-medium">Payment ID</th>
+                      <th className="px-4 py-3 font-medium">Used</th>
+                      <th className="px-4 py-3 font-medium">Expires At</th>
+                      <th className="px-4 py-3 font-medium">Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.entitlements?.items.map((entitlement) => (
+                      <tr
+                        key={entitlement.id}
+                        className="border-b border-neutral-900 align-top"
+                      >
+                        <td className="px-4 py-3 text-white">{entitlement.id}</td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {entitlement.drop_id}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {entitlement.payment_id}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {entitlement.is_used ? "true" : "false"}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {entitlement.expires_at ?? "null"}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {entitlement.created_at ?? "null"}
                         </td>
                       </tr>
                     ))}
