@@ -13,18 +13,27 @@ GeoVault Dashboard
 
 ## Current factual state (VERIFIED)
 
-### Frontend
+### Frontend foundation
 - Next.js App Router project
-- Minimal scaffold only
-- No real dashboard implementation exists yet
+- Minimal scaffold still in place
+- No dashboard feature UI exists yet
 - No dashboard routes or feature pages exist yet
 
 ### Existing frontend files
 - app/layout.tsx
 - app/page.tsx
 - app/globals.css
+- src/types/api.ts
+- src/lib/config.ts
+- src/lib/api.ts
 - public assets
 - config files
+
+### Verified completed implementation
+- `BACKEND_CONTRACT.md` exists and is derived from backend code
+- contract-locked TypeScript API types exist
+- minimal config layer exists
+- minimal request layer exists
 
 ### Confirmed NOT implemented
 - Admin dashboard UI
@@ -32,18 +41,15 @@ GeoVault Dashboard
 - Payments UI
 - Entitlements UI
 - Map view
-- API integration layer
-- Typed frontend contract layer
+- Read-only dashboard page
 - Auth system
 - Role system
 - Shared component system
 - State management layer
 
-### Backend contract status
-- `BACKEND_CONTRACT.md` exists
-- It has been derived from verified backend code
-- Frontend work must follow this file exactly
-- No frontend field, route, or state shape may exceed the verified contract
+### Contract rule
+Frontend work must follow `BACKEND_CONTRACT.md` exactly.
+No frontend field, route, request shape, or response shape may exceed the verified contract.
 
 ### Important rule
 Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT IMPLEMENTED.
@@ -52,18 +58,18 @@ Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT 
 
 ## Current phase
 
-Phase 1 — Contract lock complete
+Phase 2 — Contract foundation complete
 
 ---
 
 ## Next approved task
 
-Create the frontend contract-aligned type layer only.
+Create the first minimal read-only dashboard page using only verified API/config/types.
 
 Allowed scope:
-- read `BACKEND_CONTRACT.md`
-- define exact frontend TypeScript types that mirror verified backend structures
-- no UI
-- no components
-- no fetch logic
-- no mock expansion beyond verified contract
+- create one read-only page
+- use existing request helpers only
+- use existing type layer only
+- render only verified fields
+- no extra dashboard features
+- no invented filters, charts, tabs, or summaries

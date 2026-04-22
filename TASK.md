@@ -2,17 +2,17 @@
 
 ## Current task
 
-DO NOT BUILD UI.
+BUILD ONLY ONE READ-ONLY PAGE.
 
-DO NOT WRITE COMPONENTS.
+DO NOT ADD EXTRA PAGES.
 
-DO NOT ADD API CALLS.
+DO NOT ADD NEW FEATURES.
 
 ---
 
 ## Task
 
-Create contract-locked frontend types from `BACKEND_CONTRACT.md`.
+Create the first minimal read-only dashboard page from verified contract data.
 
 ---
 
@@ -20,42 +20,47 @@ Create contract-locked frontend types from `BACKEND_CONTRACT.md`.
 
 1. Inspect:
    - `BACKEND_CONTRACT.md`
-   - current frontend file tree
+   - `src/types/api.ts`
+   - `src/lib/api.ts`
+   - current app file tree
 
-2. Create only the minimal type file(s) needed to represent:
-   - health response
-   - root response
-   - drop list item
-   - admin drops response
-   - admin entitlements response
-   - admin summary response
-   - claim request / success / out_of_range
-   - reveal request / success
-   - payments create request / success
-   - payments callback handled responses
+2. Replace the scaffold homepage only.
 
-3. Keep every field exactly aligned to verified backend contract.
+3. The page may render only:
+   - API health status from `/health`
+   - root API message from `/`
+   - admin summary values from `/admin/summary`
 
-4. Do not invent:
-   - optional frontend-only fields
-   - labels
-   - enums not proven by contract
-   - UI helper types
-   - filters/sort state
-   - view models
+4. Render only verified fields already present in the contract and type layer.
+
+5. Do not add:
+   - charts
+   - filters
+   - search
+   - tabs
+   - mock sections
+   - payments tables
+   - drops tables
+   - entitlement tables
+   - map UI
+   - auth UI
+   - local state abstractions beyond what is strictly required
 
 ---
 
 ## Output requirement
 
-- Types only
+- One minimal read-only page only
+- Use existing config/api/types only
 - Exact contract alignment
 - No assumptions
-- No placeholders
-- No frontend rendering code
+- No placeholders beyond loading/error states
 
 ---
 
 ## Completion condition
 
-A minimal TypeScript type layer exists and every field maps directly to `BACKEND_CONTRACT.md`.
+`app/page.tsx` is replaced with a minimal read-only contract-aligned page that fetches and renders:
+- health status
+- root message
+- admin summary

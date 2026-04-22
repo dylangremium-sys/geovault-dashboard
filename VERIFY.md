@@ -11,7 +11,7 @@ Defines how every step must be verified.
 - No step is complete without verification
 - Verification must be command-based or file-based
 - No “it should work”
-- For frontend contract work, `BACKEND_CONTRACT.md` is the source of truth
+- `BACKEND_CONTRACT.md` is the source of truth for all frontend fields
 
 ---
 
@@ -20,22 +20,28 @@ Defines how every step must be verified.
 Before frontend implementation:
 - read `BACKEND_CONTRACT.md`
 - confirm no extra fields are introduced
-- confirm every added type maps to verified backend structures only
+- confirm existing types and request helpers are reused
+- confirm rendered fields are contract-backed only
 
 ---
 
 ## Frontend verification
 
-For type-layer steps:
-- file exists in repo
-- file contents match verified contract
-- TypeScript compiles if applicable
-- no UI files changed unless explicitly approved
+For the first read-only page:
+- only `app/page.tsx` changes unless explicitly required
+- page uses existing `src/lib/api.ts`
+- page uses existing `src/types/api.ts`
+- rendered fields are limited to:
+  - health status
+  - root message
+  - admin summary values
+- no unapproved sections appear
 
-Later frontend checks:
+Runtime checks:
 - dev server runs
+- page renders
 - no console errors
-- layout renders correctly
+- request failures are handled visibly
 
 ---
 
