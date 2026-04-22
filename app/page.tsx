@@ -1,5 +1,6 @@
-import { getAdminSummary, getHealth, getRoot } from "@/src/lib/api";
+import { getAdminDrops, getAdminSummary, getHealth, getRoot } from "@/src/lib/api";
 import type {
+  AdminDropsResponse,
   AdminSummaryResponse,
   HealthResponse,
   RootResponse,
@@ -9,16 +10,18 @@ async function loadDashboardData(): Promise<{
   health?: HealthResponse;
   root?: RootResponse;
   summary?: AdminSummaryResponse;
+  drops?: AdminDropsResponse;
   error?: string;
 }> {
   try {
-    const [health, root, summary] = await Promise.all([
+    const [health, root, summary, drops] = await Promise.all([
       getHealth(),
       getRoot(),
       getAdminSummary(),
+      getAdminDrops(),
     ]);
 
-    return { health, root, summary };
+    return { health, root, summary, drops };
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unknown error",
@@ -46,7 +49,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mx-auto max-w-6xl px-6 py-10">
         <header className="mb-8 border-b border-neutral-800 pb-6">
           <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">
             GeoVault Dashboard
@@ -84,7 +87,7 @@ export default async function Home() {
               </div>
             </section>
 
-            <section>
+            <section className="mb-8">
               <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
                 Admin Summary
               </div>
@@ -106,6 +109,45 @@ export default async function Home() {
                   label="Used Entitlements"
                   value={data.summary?.summary.used_entitlements ?? "Unavailable"}
                 />
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                Admin Drops
+              </div>
+
+              <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
+                <table className="min-w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-800 text-left text-neutral-500">
+                      <th className="px-4 py-3 font-medium">ID</th>
+                      <th className="px-4 py-3 font-medium">W3W Address</th>
+                      <th className="px-4 py-3 font-medium">Lat</th>
+                      <th className="px-4 py-3 font-medium">Lng</th>
+                      <th className="px-4 py-3 font-medium">Price Crypto</th>
+                      <th className="px-4 py-3 font-medium">Claimed</th>
+                      <th className="px-4 py-3 font-medium">Product ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.drops?.items.map((drop) => (
+                      <tr key={drop.id} className="border-b border-neutral-900 align-top">
+                        <td className="px-4 py-3 text-white">{drop.id}</td>
+                        <td className="px-4 py-3 text-neutral-200">{drop.w3w_address}</td>
+                        <td className="px-4 py-3 text-neutral-200">{drop.lat}</td>
+                        <td className="px-4 py-3 text-neutral-200">{drop.lng}</td>
+                        <td className="px-4 py-3 text-neutral-200">{drop.price_crypto}</td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {drop.is_claimed ? "true" : "false"}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-200">
+                          {drop.product_id ?? "null"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
           </>
