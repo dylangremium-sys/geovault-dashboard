@@ -104,7 +104,7 @@ export type CreatePaymentSuccessResponse = {
 
 export type PaymentsCallbackIgnoredResponse = {
   status: "ignored";
-  payment_status: string;
+  payment_status: string | null;
 };
 
 export type PaymentsCallbackAlreadyProcessedResponse = {
