@@ -125,3 +125,15 @@ export type PaymentsCallbackResponse =
   | PaymentsCallbackIgnoredResponse
   | PaymentsCallbackAlreadyProcessedResponse
   | PaymentsCallbackEntitlementIssuedResponse;
+
+export type CreateDropRequest = {
+  w3w_address: string;
+  lat: number;
+  lng: number;
+  price_crypto: number;
+};
+
+export type CreateDropSuccessResponse = {
+  status: "success";
+  id: number;
+};

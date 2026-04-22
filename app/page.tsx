@@ -4,11 +4,13 @@ import {
   getAdminSummary,
   getHealth,
   getRoot,
+  postCreateDrop,
 } from "@/src/lib/api";
 import type {
   AdminDropsResponse,
   AdminEntitlementsResponse,
   AdminSummaryResponse,
+  CreateDropSuccessResponse,
   HealthResponse,
   RootResponse,
 } from "@/src/types/api";
@@ -38,6 +40,17 @@ async function loadDashboardData(): Promise<DashboardData> {
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
+}
+
+async function createDropAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await postCreateDrop({
+    w3w_address: String(formData.get("w3w_address") ?? ""),
+    lat: Number(formData.get("lat")),
+    lng: Number(formData.get("lng")),
+    price_crypto: Number(formData.get("price_crypto")),
+  });
 }
 
 function SectionTitle({ children }: { children: string }) {
@@ -201,7 +214,7 @@ function EntitlementsSection({
   entitlements?: AdminEntitlementsResponse;
 }) {
   return (
-    <section>
+    <section className="mb-8">
       <SectionTitle>Admin Entitlements</SectionTitle>
 
       <DataTable
@@ -239,6 +252,44 @@ function EntitlementsSection({
   );
 }
 
+function CreateDropSection() {
+  return (
+    <section>
+      <SectionTitle>Create Drop</SectionTitle>
+
+      <form action={createDropAction} className="grid max-w-md gap-3">
+        <input
+          name="w3w_address"
+          placeholder="w3w_address"
+          className="border border-neutral-800 bg-black p-2 text-white"
+          required
+        />
+        <input
+          name="lat"
+          placeholder="lat"
+          className="border border-neutral-800 bg-black p-2 text-white"
+          required
+        />
+        <input
+          name="lng"
+          placeholder="lng"
+          className="border border-neutral-800 bg-black p-2 text-white"
+          required
+        />
+        <input
+          name="price_crypto"
+          placeholder="price_crypto"
+          className="border border-neutral-800 bg-black p-2 text-white"
+          required
+        />
+        <button type="submit" className="bg-white p-2 text-black">
+          Submit
+        </button>
+      </form>
+    </section>
+  );
+}
+
 export default async function Home() {
   const data = await loadDashboardData();
 
@@ -263,6 +314,7 @@ export default async function Home() {
             <SummarySection summary={data.summary} />
             <DropsSection drops={data.drops} />
             <EntitlementsSection entitlements={data.entitlements} />
+            <CreateDropSection />
           </>
         )}
       </div>

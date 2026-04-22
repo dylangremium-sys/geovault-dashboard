@@ -5,6 +5,8 @@ import type {
   AdminSummaryResponse,
   ClaimRequest,
   ClaimResponse,
+  CreateDropRequest,
+  CreateDropSuccessResponse,
   CreatePaymentRequest,
   CreatePaymentSuccessResponse,
   HealthResponse,
@@ -109,6 +111,19 @@ export async function postCreatePayment(
   payload: CreatePaymentRequest,
 ): Promise<CreatePaymentSuccessResponse> {
   return request<CreatePaymentSuccessResponse>("/payments/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...adminHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function postCreateDrop(
+  payload: CreateDropRequest,
+): Promise<CreateDropSuccessResponse> {
+  return request<CreateDropSuccessResponse>("/drops", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
