@@ -11,25 +11,28 @@ Defines how every step must be verified.
 - No step is complete without verification
 - Verification must be command-based or file-based
 - No “it should work”
+- For frontend contract work, `BACKEND_CONTRACT.md` is the source of truth
 
 ---
 
-## Backend verification
+## Contract verification
 
-Use:
-
-curl http://127.0.0.1:8000/health
-
-Example checks:
-
-- endpoint responds
-- correct status code
-- correct JSON shape
+Before frontend implementation:
+- read `BACKEND_CONTRACT.md`
+- confirm no extra fields are introduced
+- confirm every added type maps to verified backend structures only
 
 ---
 
-## Frontend verification (later)
+## Frontend verification
 
+For type-layer steps:
+- file exists in repo
+- file contents match verified contract
+- TypeScript compiles if applicable
+- no UI files changed unless explicitly approved
+
+Later frontend checks:
 - dev server runs
 - no console errors
 - layout renders correctly
