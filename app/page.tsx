@@ -13,14 +13,16 @@ import type {
   RootResponse,
 } from "@/src/types/api";
 
-async function loadDashboardData(): Promise<{
+type DashboardData = {
   health?: HealthResponse;
   root?: RootResponse;
   summary?: AdminSummaryResponse;
   drops?: AdminDropsResponse;
   entitlements?: AdminEntitlementsResponse;
   error?: string;
-}> {
+};
+
+async function loadDashboardData(): Promise<DashboardData> {
   try {
     const [health, root, summary, drops, entitlements] = await Promise.all([
       getHealth(),
@@ -38,6 +40,29 @@ async function loadDashboardData(): Promise<{
   }
 }
 
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
+      {children}
+    </div>
+  );
+}
+
+function Panel({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-neutral-800 bg-neutral-950 p-4">
+      <div className="text-xs uppercase tracking-wide text-neutral-500">{label}</div>
+      <div className="mt-2">{children}</div>
+    </div>
+  );
+}
+
 function Field({
   label,
   value,
@@ -46,10 +71,171 @@ function Field({
   value: string | number;
 }) {
   return (
-    <div className="border border-neutral-800 bg-neutral-950 p-4">
-      <div className="text-xs uppercase tracking-wide text-neutral-500">{label}</div>
-      <div className="mt-2 text-2xl text-white">{value}</div>
+    <Panel label={label}>
+      <div className="text-2xl text-white">{value}</div>
+    </Panel>
+  );
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <section className="border border-red-900 bg-red-950/30 p-4">
+      <div className="text-xs uppercase tracking-wide text-red-400">Error</div>
+      <div className="mt-2 text-sm text-red-200">{message}</div>
+    </section>
+  );
+}
+
+function KeyValueOverview({
+  health,
+  root,
+}: {
+  health?: HealthResponse;
+  root?: RootResponse;
+}) {
+  return (
+    <section className="mb-8 grid gap-4 md:grid-cols-2">
+      <Panel label="API Health">
+        <div className="text-2xl text-white">{health?.status ?? "Unavailable"}</div>
+      </Panel>
+
+      <Panel label="API Message">
+        <div className="text-sm text-neutral-200">
+          {root?.message ?? "Unavailable"}
+        </div>
+      </Panel>
+    </section>
+  );
+}
+
+function SummarySection({ summary }: { summary?: AdminSummaryResponse }) {
+  return (
+    <section className="mb-8">
+      <SectionTitle>Admin Summary</SectionTitle>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Field
+          label="Total Drops"
+          value={summary?.summary.total_drops ?? "Unavailable"}
+        />
+        <Field
+          label="Claimed Drops"
+          value={summary?.summary.claimed_drops ?? "Unavailable"}
+        />
+        <Field
+          label="Total Entitlements"
+          value={summary?.summary.total_entitlements ?? "Unavailable"}
+        />
+        <Field
+          label="Used Entitlements"
+          value={summary?.summary.used_entitlements ?? "Unavailable"}
+        />
+      </div>
+    </section>
+  );
+}
+
+function DataTable({
+  headers,
+  rows,
+}: {
+  headers: string[];
+  rows: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
+      <table className="min-w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-neutral-800 text-left text-neutral-500">
+            {headers.map((header) => (
+              <th key={header} className="px-4 py-3 font-medium">
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
     </div>
+  );
+}
+
+function DropsSection({ drops }: { drops?: AdminDropsResponse }) {
+  return (
+    <section className="mb-8">
+      <SectionTitle>Admin Drops</SectionTitle>
+
+      <DataTable
+        headers={[
+          "ID",
+          "W3W Address",
+          "Lat",
+          "Lng",
+          "Price Crypto",
+          "Claimed",
+          "Product ID",
+        ]}
+        rows={drops?.items.map((drop) => (
+          <tr key={drop.id} className="border-b border-neutral-900 align-top">
+            <td className="px-4 py-3 text-white">{drop.id}</td>
+            <td className="px-4 py-3 text-neutral-200">{drop.w3w_address}</td>
+            <td className="px-4 py-3 text-neutral-200">{drop.lat}</td>
+            <td className="px-4 py-3 text-neutral-200">{drop.lng}</td>
+            <td className="px-4 py-3 text-neutral-200">{drop.price_crypto}</td>
+            <td className="px-4 py-3 text-neutral-200">
+              {drop.is_claimed ? "true" : "false"}
+            </td>
+            <td className="px-4 py-3 text-neutral-200">
+              {drop.product_id ?? "null"}
+            </td>
+          </tr>
+        ))}
+      />
+    </section>
+  );
+}
+
+function EntitlementsSection({
+  entitlements,
+}: {
+  entitlements?: AdminEntitlementsResponse;
+}) {
+  return (
+    <section>
+      <SectionTitle>Admin Entitlements</SectionTitle>
+
+      <DataTable
+        headers={[
+          "ID",
+          "Drop ID",
+          "Payment ID",
+          "Used",
+          "Expires At",
+          "Created At",
+        ]}
+        rows={entitlements?.items.map((entitlement) => (
+          <tr
+            key={entitlement.id}
+            className="border-b border-neutral-900 align-top"
+          >
+            <td className="px-4 py-3 text-white">{entitlement.id}</td>
+            <td className="px-4 py-3 text-neutral-200">{entitlement.drop_id}</td>
+            <td className="px-4 py-3 text-neutral-200">
+              {entitlement.payment_id}
+            </td>
+            <td className="px-4 py-3 text-neutral-200">
+              {entitlement.is_used ? "true" : "false"}
+            </td>
+            <td className="px-4 py-3 text-neutral-200">
+              {entitlement.expires_at ?? "null"}
+            </td>
+            <td className="px-4 py-3 text-neutral-200">
+              {entitlement.created_at ?? "null"}
+            </td>
+          </tr>
+        ))}
+      />
+    </section>
   );
 }
 
@@ -70,141 +256,13 @@ export default async function Home() {
         </header>
 
         {data.error ? (
-          <section className="border border-red-900 bg-red-950/30 p-4">
-            <div className="text-xs uppercase tracking-wide text-red-400">Error</div>
-            <div className="mt-2 text-sm text-red-200">{data.error}</div>
-          </section>
+          <ErrorState message={data.error} />
         ) : (
           <>
-            <section className="mb-8 grid gap-4 md:grid-cols-2">
-              <div className="border border-neutral-800 bg-neutral-950 p-4">
-                <div className="text-xs uppercase tracking-wide text-neutral-500">
-                  API Health
-                </div>
-                <div className="mt-2 text-2xl text-white">
-                  {data.health?.status ?? "Unavailable"}
-                </div>
-              </div>
-
-              <div className="border border-neutral-800 bg-neutral-950 p-4">
-                <div className="text-xs uppercase tracking-wide text-neutral-500">
-                  API Message
-                </div>
-                <div className="mt-2 text-sm text-neutral-200">
-                  {data.root?.message ?? "Unavailable"}
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
-                Admin Summary
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <Field
-                  label="Total Drops"
-                  value={data.summary?.summary.total_drops ?? "Unavailable"}
-                />
-                <Field
-                  label="Claimed Drops"
-                  value={data.summary?.summary.claimed_drops ?? "Unavailable"}
-                />
-                <Field
-                  label="Total Entitlements"
-                  value={data.summary?.summary.total_entitlements ?? "Unavailable"}
-                />
-                <Field
-                  label="Used Entitlements"
-                  value={data.summary?.summary.used_entitlements ?? "Unavailable"}
-                />
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
-                Admin Drops
-              </div>
-
-              <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
-                <table className="min-w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                      <th className="px-4 py-3 font-medium">ID</th>
-                      <th className="px-4 py-3 font-medium">W3W Address</th>
-                      <th className="px-4 py-3 font-medium">Lat</th>
-                      <th className="px-4 py-3 font-medium">Lng</th>
-                      <th className="px-4 py-3 font-medium">Price Crypto</th>
-                      <th className="px-4 py-3 font-medium">Claimed</th>
-                      <th className="px-4 py-3 font-medium">Product ID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.drops?.items.map((drop) => (
-                      <tr key={drop.id} className="border-b border-neutral-900 align-top">
-                        <td className="px-4 py-3 text-white">{drop.id}</td>
-                        <td className="px-4 py-3 text-neutral-200">{drop.w3w_address}</td>
-                        <td className="px-4 py-3 text-neutral-200">{drop.lat}</td>
-                        <td className="px-4 py-3 text-neutral-200">{drop.lng}</td>
-                        <td className="px-4 py-3 text-neutral-200">{drop.price_crypto}</td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {drop.is_claimed ? "true" : "false"}
-                        </td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {drop.product_id ?? "null"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section>
-              <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
-                Admin Entitlements
-              </div>
-
-              <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
-                <table className="min-w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                      <th className="px-4 py-3 font-medium">ID</th>
-                      <th className="px-4 py-3 font-medium">Drop ID</th>
-                      <th className="px-4 py-3 font-medium">Payment ID</th>
-                      <th className="px-4 py-3 font-medium">Used</th>
-                      <th className="px-4 py-3 font-medium">Expires At</th>
-                      <th className="px-4 py-3 font-medium">Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.entitlements?.items.map((entitlement) => (
-                      <tr
-                        key={entitlement.id}
-                        className="border-b border-neutral-900 align-top"
-                      >
-                        <td className="px-4 py-3 text-white">{entitlement.id}</td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {entitlement.drop_id}
-                        </td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {entitlement.payment_id}
-                        </td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {entitlement.is_used ? "true" : "false"}
-                        </td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {entitlement.expires_at ?? "null"}
-                        </td>
-                        <td className="px-4 py-3 text-neutral-200">
-                          {entitlement.created_at ?? "null"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <KeyValueOverview health={data.health} root={data.root} />
+            <SummarySection summary={data.summary} />
+            <DropsSection drops={data.drops} />
+            <EntitlementsSection entitlements={data.entitlements} />
           </>
         )}
       </div>
