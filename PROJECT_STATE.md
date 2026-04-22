@@ -15,9 +15,9 @@ GeoVault Dashboard
 
 ### Frontend foundation
 - Next.js App Router project
-- Minimal scaffold still in place
-- No dashboard feature UI exists yet
-- No dashboard routes or feature pages exist yet
+- Minimal dashboard implementation now exists on the homepage
+- Homepage is connected to the live backend
+- Homepage renders verified contract-backed data only
 
 ### Existing frontend files
 - app/layout.tsx
@@ -34,22 +34,32 @@ GeoVault Dashboard
 - contract-locked TypeScript API types exist
 - minimal config layer exists
 - minimal request layer exists
+- first minimal read-only page exists
+- runtime verification completed successfully
+- live backend connectivity verified
+- authenticated `/admin/summary` rendering verified
+
+### Verified homepage content
+The homepage currently renders only:
+- API health status
+- root API message
+- admin summary values
 
 ### Confirmed NOT implemented
-- Admin dashboard UI
-- Drops UI
+- Admin drops list page/section
 - Payments UI
 - Entitlements UI
 - Map view
-- Read-only dashboard page
-- Auth system
+- Multi-page dashboard structure
+- Auth UI
 - Role system
 - Shared component system
 - State management layer
+- Filters/search/sort/tabs/charts
 
 ### Contract rule
 Frontend work must follow `BACKEND_CONTRACT.md` exactly.
-No frontend field, route, request shape, or response shape may exceed the verified contract.
+No frontend field, route, request shape, response shape, or rendered label may exceed the verified contract.
 
 ### Important rule
 Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT IMPLEMENTED.
@@ -58,18 +68,21 @@ Anything not present in the repo or not present in `BACKEND_CONTRACT.md` is NOT 
 
 ## Current phase
 
-Phase 2 — Contract foundation complete
+Phase 3 — Live read-only validation complete
 
 ---
 
 ## Next approved task
 
-Create the first minimal read-only dashboard page using only verified API/config/types.
+Extend the homepage with one additional read-only contract-backed section only:
+- admin drops list from `/admin/drops`
 
 Allowed scope:
-- create one read-only page
-- use existing request helpers only
-- use existing type layer only
-- render only verified fields
-- no extra dashboard features
-- no invented filters, charts, tabs, or summaries
+- reuse existing request helpers and type layer
+- extend homepage only
+- render only verified fields from admin drops response
+- no filters
+- no sorting UI
+- no search
+- no row actions
+- no edit/create/delete controls

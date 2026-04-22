@@ -20,28 +20,33 @@ Defines how every step must be verified.
 Before frontend implementation:
 - read `BACKEND_CONTRACT.md`
 - confirm no extra fields are introduced
-- confirm existing types and request helpers are reused
+- confirm existing request helpers and types are reused
 - confirm rendered fields are contract-backed only
 
 ---
 
 ## Frontend verification
 
-For the first read-only page:
-- only `app/page.tsx` changes unless explicitly required
-- page uses existing `src/lib/api.ts`
-- page uses existing `src/types/api.ts`
-- rendered fields are limited to:
-  - health status
-  - root message
-  - admin summary values
-- no unapproved sections appear
+For the homepage extension step:
+- only approved files change
+- homepage still renders existing validated sections
+- added section uses `/admin/drops`
+- rendered item fields are limited to:
+  - `id`
+  - `w3w_address`
+  - `lat`
+  - `lng`
+  - `price_crypto`
+  - `is_claimed`
+  - `product_id`
+- no unapproved controls or sections appear
 
 Runtime checks:
 - dev server runs
 - page renders
 - no console errors
-- request failures are handled visibly
+- existing summary still works
+- admin drops section renders real backend data or visible error state
 
 ---
 

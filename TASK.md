@@ -2,7 +2,7 @@
 
 ## Current task
 
-BUILD ONLY ONE READ-ONLY PAGE.
+EXTEND ONLY THE EXISTING HOMEPAGE.
 
 DO NOT ADD EXTRA PAGES.
 
@@ -12,7 +12,7 @@ DO NOT ADD NEW FEATURES.
 
 ## Task
 
-Create the first minimal read-only dashboard page from verified contract data.
+Add one minimal read-only admin drops section to `app/page.tsx`.
 
 ---
 
@@ -22,35 +22,42 @@ Create the first minimal read-only dashboard page from verified contract data.
    - `BACKEND_CONTRACT.md`
    - `src/types/api.ts`
    - `src/lib/api.ts`
-   - current app file tree
+   - `app/page.tsx`
 
-2. Replace the scaffold homepage only.
+2. Reuse the existing homepage only.
 
-3. The page may render only:
-   - API health status from `/health`
-   - root API message from `/`
-   - admin summary values from `/admin/summary`
+3. Add one additional read-only section backed by:
+   - `/admin/drops`
 
-4. Render only verified fields already present in the contract and type layer.
+4. Render only verified fields from each drop item:
+   - `id`
+   - `w3w_address`
+   - `lat`
+   - `lng`
+   - `price_crypto`
+   - `is_claimed`
+   - `product_id`
 
-5. Do not add:
-   - charts
+5. Keep the presentation minimal.
+   A simple stacked list or plain table is acceptable.
+
+6. Do not add:
    - filters
    - search
    - tabs
-   - mock sections
-   - payments tables
-   - drops tables
-   - entitlement tables
-   - map UI
-   - auth UI
-   - local state abstractions beyond what is strictly required
+   - charts
+   - buttons
+   - edit actions
+   - pagination
+   - row expansion
+   - client-side state abstractions unless strictly required
 
 ---
 
 ## Output requirement
 
-- One minimal read-only page only
+- Homepage only
+- One additional read-only section only
 - Use existing config/api/types only
 - Exact contract alignment
 - No assumptions
@@ -60,7 +67,10 @@ Create the first minimal read-only dashboard page from verified contract data.
 
 ## Completion condition
 
-`app/page.tsx` is replaced with a minimal read-only contract-aligned page that fetches and renders:
+`app/page.tsx` renders:
 - health status
 - root message
 - admin summary
+- admin drops list
+
+All fields must map directly to verified contract data.
