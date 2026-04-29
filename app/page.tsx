@@ -1,4 +1,5 @@
 import Panel from "@/src/components/ui/Panel";
+import Field from "@/src/components/ui/Field";
 import {
   getAdminDrops,
   getAdminEntitlements,
@@ -59,21 +60,9 @@ function SectionTitle({ children }: { children: string }) {
     <div className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
       {children}
     </div>
-  );
+  )
 }
-function Field({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Panel label={label}>
-      <div className="text-2xl text-white">{value}</div>
-    </Panel>
-  );
-}
+
 
 function ErrorState({ message }: { message: string }) {
   return (
