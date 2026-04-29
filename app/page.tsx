@@ -1,3 +1,4 @@
+import Panel from "@/src/components/ui/Panel";
 import {
   getAdminDrops,
   getAdminEntitlements,
@@ -60,22 +61,6 @@ function SectionTitle({ children }: { children: string }) {
     </div>
   );
 }
-
-function Panel({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="border border-neutral-800 bg-neutral-950 p-4">
-      <div className="text-xs uppercase tracking-wide text-neutral-500">{label}</div>
-      <div className="mt-2">{children}</div>
-    </div>
-  );
-}
-
 function Field({
   label,
   value,
