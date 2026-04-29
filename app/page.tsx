@@ -1,5 +1,8 @@
 import Panel from "@/src/components/ui/Panel";
 import Field from "@/src/components/ui/Field";
+import SectionTitle from "@/src/components/ui/SectionTitle";
+import DataTable from "@/src/components/ui/DataTable";
+import ErrorState from "@/src/components/ui/ErrorState";
 import {
   getAdminDrops,
   getAdminEntitlements,
@@ -8,14 +11,6 @@ import {
   getRoot,
   postCreateDrop,
 } from "@/src/lib/api";
-import type {
-  AdminDropsResponse,
-  AdminEntitlementsResponse,
-  AdminSummaryResponse,
-  CreateDropSuccessResponse,
-  HealthResponse,
-  RootResponse,
-} from "@/src/types/api";
 
 type DashboardData = {
   health?: HealthResponse;
@@ -122,30 +117,6 @@ function SummarySection({ summary }: { summary?: AdminSummaryResponse }) {
   );
 }
 
-function DataTable({
-  headers,
-  rows,
-}: {
-  headers: string[];
-  rows: React.ReactNode;
-}) {
-  return (
-    <div className="overflow-x-auto border border-neutral-800 bg-neutral-950">
-      <table className="min-w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-neutral-800 text-left text-neutral-500">
-            {headers.map((header) => (
-              <th key={header} className="px-4 py-3 font-medium">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </div>
-  );
-}
 
 function DropsSection({ drops }: { drops?: AdminDropsResponse }) {
   return (
