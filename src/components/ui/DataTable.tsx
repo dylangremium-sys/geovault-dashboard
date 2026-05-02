@@ -1,6 +1,6 @@
 type DataTableProps = {
     headers: string[];
-    rows: React.ReactNode;
+    rows: React.ReactNode | null;
   };
   
   export default function DataTable({ headers, rows }: DataTableProps) {
@@ -16,7 +16,18 @@ type DataTableProps = {
               ))}
             </tr>
           </thead>
-          <tbody>{rows}</tbody>
+          <tbody>
+            {rows ?? (
+              <tr>
+                <td
+                  colSpan={headers.length}
+                  className="px-4 py-3 text-center text-neutral-500"
+                >
+                  No data available.
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
     );

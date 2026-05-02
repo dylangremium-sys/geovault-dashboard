@@ -125,21 +125,25 @@ function DropsSection({ drops }: { drops?: AdminDropsResponse }) {
           "Claimed",
           "Product ID",
         ]}
-        rows={drops?.items.map((drop) => (
-          <tr key={drop.id} className="border-b border-neutral-900 align-top">
-            <td className="px-4 py-3 text-white">{drop.id}</td>
-            <td className="px-4 py-3 text-neutral-200">{drop.w3w_address}</td>
-            <td className="px-4 py-3 text-neutral-200">{drop.lat}</td>
-            <td className="px-4 py-3 text-neutral-200">{drop.lng}</td>
-            <td className="px-4 py-3 text-neutral-200">{drop.price_crypto}</td>
-            <td className="px-4 py-3 text-neutral-200">
-              {drop.is_claimed ? "true" : "false"}
-            </td>
-            <td className="px-4 py-3 text-neutral-200">
-              {drop.product_id ?? "null"}
-            </td>
-          </tr>
-        ))}
+        rows={
+          drops?.items.length === 0
+            ? null
+            : drops?.items.map((drop) => (
+                <tr key={drop.id} className="border-b border-neutral-900 align-top">
+                  <td className="px-4 py-3 text-white">{drop.id}</td>
+                  <td className="px-4 py-3 text-neutral-200">{drop.w3w_address}</td>
+                  <td className="px-4 py-3 text-neutral-200">{drop.lat}</td>
+                  <td className="px-4 py-3 text-neutral-200">{drop.lng}</td>
+                  <td className="px-4 py-3 text-neutral-200">{drop.price_crypto}</td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {drop.is_claimed ? "true" : "false"}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {drop.product_id ?? "null"}
+                  </td>
+                </tr>
+              ))
+        }
       />
     </section>
   );
@@ -163,27 +167,31 @@ function EntitlementsSection({
           "Expires At",
           "Created At",
         ]}
-        rows={entitlements?.items.map((entitlement) => (
-          <tr
-            key={entitlement.id}
-            className="border-b border-neutral-900 align-top"
-          >
-            <td className="px-4 py-3 text-white">{entitlement.id}</td>
-            <td className="px-4 py-3 text-neutral-200">{entitlement.drop_id}</td>
-            <td className="px-4 py-3 text-neutral-200">
-              {entitlement.payment_id}
-            </td>
-            <td className="px-4 py-3 text-neutral-200">
-              {entitlement.is_used ? "true" : "false"}
-            </td>
-            <td className="px-4 py-3 text-neutral-200">
-              {entitlement.expires_at ?? "null"}
-            </td>
-            <td className="px-4 py-3 text-neutral-200">
-              {entitlement.created_at ?? "null"}
-            </td>
-          </tr>
-        ))}
+        rows={
+          entitlements?.items.length === 0
+            ? null
+            : entitlements?.items.map((entitlement) => (
+                <tr
+                  key={entitlement.id}
+                  className="border-b border-neutral-900 align-top"
+                >
+                  <td className="px-4 py-3 text-white">{entitlement.id}</td>
+                  <td className="px-4 py-3 text-neutral-200">{entitlement.drop_id}</td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {entitlement.payment_id}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {entitlement.is_used ? "true" : "false"}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {entitlement.expires_at ?? "null"}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-200">
+                    {entitlement.created_at ?? "null"}
+                  </td>
+                </tr>
+              ))
+        }
       />
     </section>
   );
