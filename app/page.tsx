@@ -42,12 +42,16 @@ async function loadDashboardData(): Promise<DashboardData> {
 async function createDropAction(formData: FormData): Promise<void> {
   "use server";
 
-  await postCreateDrop({
-    w3w_address: String(formData.get("w3w_address") ?? ""),
-    lat: Number(formData.get("lat")),
-    lng: Number(formData.get("lng")),
-    price_crypto: Number(formData.get("price_crypto")),
-  });
+  try {
+    await postCreateDrop({
+      w3w_address: String(formData.get("w3w_address") ?? ""),
+      lat: Number(formData.get("lat")),
+      lng: Number(formData.get("lng")),
+      price_crypto: Number(formData.get("price_crypto")),
+    });
+  } catch (error) {
+    console.error("Create drop failed:", error);
+  }
 }
 
 

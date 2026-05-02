@@ -34,8 +34,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`API request failed: ${response.status} ${text}`);
+    if (response.status === 401) {
+      throw new Error("Unauthorized. Check dashboard API key.");
+    }
+    if (response.status === 422) {
+      throw new Error("Request validation failed.");
+    }
+    if (response.status >= 500) {
+      throw new Error("Backend unavailable.");
+    }
+    throw new Error(`Request failed (${response.status})`);
   }
 
   return response.json() as Promise<T>;
