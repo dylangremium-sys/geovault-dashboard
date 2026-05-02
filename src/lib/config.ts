@@ -3,3 +3,6 @@ export const API_BASE_URL =
 
 export const ADMIN_API_KEY =
   process.env.NEXT_PUBLIC_ADMIN_API_KEY?.trim() || "";
+
+export const TENANT_ID =
+  process.env.NEXT_PUBLIC_TENANT_ID?.trim() || "";

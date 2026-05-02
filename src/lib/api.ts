@@ -1,4 +1,4 @@
-import { API_BASE_URL, ADMIN_API_KEY } from "./config";
+import { API_BASE_URL, ADMIN_API_KEY, TENANT_ID } from "./config";
 import type {
   AdminDropsResponse,
   AdminEntitlementsResponse,
@@ -42,7 +42,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 function adminHeaders(): Record<string, string> {
-  return ADMIN_API_KEY ? { "x-api-key": ADMIN_API_KEY } : {};
+  return {
+    ...(ADMIN_API_KEY ? { "x-api-key": ADMIN_API_KEY } : {}),
+    ...(TENANT_ID ? { "X-Tenant-Id": TENANT_ID } : {}),
+  };
 }
 
 export async function getHealth(): Promise<HealthResponse> {
